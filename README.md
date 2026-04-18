@@ -36,3 +36,9 @@ Scripts for installing MTA, MDA packages.
 Scripts for installing common databases packages.
 
 > Last Updated: 2026-03-16
+
+## [Web](./Web/README.md)
+
+Scripts for installing web hosting stacks.
+
+> Last Updated: 2026-04-18
