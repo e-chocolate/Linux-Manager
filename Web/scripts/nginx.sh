@@ -423,6 +423,9 @@ conf_apache() {
 conf_nginx() {
   [ ! -d "$websites_path" ] && mkdir -p "${websites_path}"
   [ ! -d "$web_logs_path" ] && mkdir -p "${web_logs_path}"
+  chown -R www:www ${websites_path} && chmod -R 755 ${websites_path}
+  chown -R www:www $web_logs_path && chmod -R 755 $web_logs_path
+
   mkdir -p /usr/local/nginx/conf/{proxy,module}
   \cp -a "${Nginx_Parent_PATH}/conf/nginx/404.conf"                     /usr/local/nginx/conf/
   \cp -a "${Nginx_Parent_PATH}/conf/nginx/enable-php-pathinfo.conf"     /usr/local/nginx/conf/
@@ -495,6 +498,7 @@ EOF
 </html>' > /usr/local/nginx/html/404.html
   mkdir -p /usr/local/nginx/conf/vhost
   chown -R root:root /usr/local/nginx/conf/
+  cat "${Nginx_Parent_PATH}/service/nginx.service" > /etc/systemd/system/nginx.service
 }
 
 conf_cloudflare() {
@@ -529,14 +533,6 @@ EOF
   fi
 }
 
-end_nginx() {
-  chmod +w ${websites_path} && chown -R www:www ${websites_path}
-  chown -R www:www $web_logs_path && chmod -R 755 $web_logs_path
-
-  cat "${Nginx_Parent_PATH}/service/nginx.service" > /etc/systemd/system/nginx.service
-  systemctl enable nginx.service
-}
-
 install_acme() {
   [ -f /usr/local/acme.sh/acme.sh ] && return 0
 
@@ -560,7 +556,7 @@ check_nginx()
   echo "Checking ..."
   if [[ -s /usr/local/nginx/conf/nginx.conf && -s /usr/local/nginx/sbin/nginx ]]; then
     systemctl daemon-reload
-    systemctl start nginx.service
+    systemctl enable --now nginx.service
     echo -e "${INFO} Nginx: OK"
     nginx -V 2>&1 | sed 's|--|\n--|g'
     reminder
@@ -587,7 +583,6 @@ install() {
   build_luajit
   make_nginx
   conf_nginx
-  end_nginx
   install_acme
   check_nginx
   echo -e "[End time: `date +'%Y-%m-%d %H:%M:%S'`]"
