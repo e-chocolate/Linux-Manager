@@ -309,8 +309,7 @@ download_nginx_modsecurity() {
   cd ${HOME}/nginx
   git clone --depth 1 -b v3/master --single-branch https://github.com/owasp-modsecurity/ModSecurity
   cd ModSecurity
-  git submodule init
-  git submodule update
+  git submodule update --init --recursive
   ./build.sh
   ./configure --prefix=/usr/local/modsecurity
   make -j$(nproc) && make install
@@ -321,7 +320,6 @@ download_nginx_modsecurity() {
 
 download_nginx_fancy() {
   cd ${HOME}/nginx
-
   local fancyindex_version=$(get_github_latest "aperezdc/ngx-fancyindex")
   local fancyindex_download_version=$(echo $fancyindex_version | sed 's/v//g')
   wget -nv https://github.com/aperezdc/ngx-fancyindex/releases/download/${fancyindex_version}/ngx-fancyindex-${fancyindex_download_version}.tar.xz -O ngx-fancyindex.tar.gz
